@@ -2,6 +2,7 @@ import os
 import cv2
 import torch.nn as nn
 from PIL import Image
+from playsound3 import playsound
 import torch, torchvision
 from torchvision.models import resnet18 
 import torchvision.transforms as transforms
@@ -40,8 +41,6 @@ def person_present(img,model,score_thr=0.6):
 def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-
-
     # Person Presant model
     # Loading the correct model with pretrained rates and setting it to eval mode
     person_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT").to(DEVICE).eval()
@@ -52,7 +51,6 @@ def main():
     Distract_Model_Transfer.fc = nn.Linear(feats, 10) # adding last layer
     Distract_Model_Transfer.load_state_dict(torch.load(os.path.join(BASE_DIR, "DistractModelTransfer.pth")))
     Distract_Model_Transfer.eval()
-
 
     # Adding a capture webcam:
     capture = cv2.VideoCapture(0)
@@ -67,6 +65,7 @@ def main():
             prediction = ClassifyDistractT(frame, Distract_Model_Transfer)
             if (prediction != 4 and last_prediction != 4):
                 print("ALERT YOU ARE NOT DRIVING SAFELY")
+                playsound(os.path.join(BASE_DIR, "Sounds","beep.mp3"))  
             else:
                 print("Good job")
             last_prediction = prediction
@@ -83,5 +82,6 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main()
+    playsound(r"D:\Wiezmann\First-Proto\Sounds\beep.mp3")
+    #main()
 
