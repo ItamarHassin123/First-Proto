@@ -7,6 +7,8 @@ from torchvision.models import resnet18
 import torchvision.transforms as transforms
 from torchvision import transforms as transforms
 
+
+
 # Transforms
 VAL_TF = transforms.Compose([
     transforms.Resize(256), # resizes
@@ -38,6 +40,8 @@ def person_present(img,model,score_thr=0.6):
 def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
+
     # Person Presant model
     # Loading the correct model with pretrained rates and setting it to eval mode
     person_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT").to(DEVICE).eval()
@@ -50,11 +54,9 @@ def main():
     Distract_Model_Transfer.eval()
 
 
-
-
     # Adding a capture webcam:
     capture = cv2.VideoCapture(0)
-
+    capture = cv2.VideoCapture(r"D:\Wiezmann\First-Proto\Vids to test\vid 3- ai.mp4")
     # MAIN LOOP
     last_prediction = 4 #initialize to driving safely
     while True:
@@ -74,7 +76,7 @@ def main():
 
         cv2.imshow("test", frame)
 
-        if cv2.waitKey(1500)  == ord('e'):
+        if cv2.waitKey(150)  == ord('e'):
             break
 
     capture.release()
