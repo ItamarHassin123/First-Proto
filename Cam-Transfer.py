@@ -48,7 +48,6 @@ def ClassifyDistract(img, model):
         tf_img = VAL_TF(img).unsqueeze(0).to(DEVICE)  # opening the image and transforming it
         logits = model(tf_img) # the results        
         pred = int(logits.argmax(dim=1).item() ) # the chosen class   
-        print(pred)
         return pred
 
 def person_present(img,model,score_thr=0.6):
