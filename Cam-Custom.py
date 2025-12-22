@@ -31,7 +31,7 @@ class ResizePad:
 
 # Transforms
 VAL_TF = transforms.Compose([
-    ResizePad(224), # resizes
+    ResizePad(256), # resizes
     transforms.ToTensor(), # turns the image into a tensor
     transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225]), # normalizes the image based on imageNet stats
 ])
