@@ -98,7 +98,7 @@ def main():
 
     # Distract classification Model
     Distract_model_custom = CNN_Distract(10)
-    state = torch.load(os.path.join(BASE_DIR, "DistractModel2.0.pth"), map_location=DEVICE)
+    state = torch.load(os.path.join(BASE_DIR, "DistractModel3.0.pth"), map_location=DEVICE)
     Distract_model_custom.load_state_dict(state)
     Distract_model_custom.to(DEVICE)
     Distract_model_custom.eval()
