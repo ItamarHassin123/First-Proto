@@ -10,7 +10,7 @@ from torchvision import transforms as transforms
 
 #Image resizer, resizes image without distortion by adding pads
 class ResizePad:
-    def __init__(self, size=224):
+    def __init__(self, size=256):
         self.size = size
 
     def __call__(self, img):
