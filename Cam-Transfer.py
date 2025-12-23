@@ -70,14 +70,14 @@ def main():
     Distract_Model_Transfer = resnet18() 
     feats = Distract_Model_Transfer.fc.in_features #number of final features
     Distract_Model_Transfer.fc = nn.Linear(feats, 10) # adding last layer
-    Distract_Model_Transfer.load_state_dict(torch.load(os.path.join(BASE_DIR, "DistractModelTransfer.pth")))
+    Distract_Model_Transfer.load_state_dict(torch.load(os.path.join(BASE_DIR,"DistractModelTransfer2.pth")))
     Distract_Model_Transfer.to(DEVICE).eval()
 
 
 
     # Adding a capture webcam:
     capture = cv2.VideoCapture(0)
-    capture = cv2.VideoCapture(r"D:\Wiezmann\First-Proto\Vids to test\vid 1- Mixed.mp4")
+    capture = cv2.VideoCapture(r"D:\Wiezmann\First-Proto\Vids to test\vid 2- Mixed Frames.mp4")
 
 
     # MAIN LOOP
@@ -93,8 +93,6 @@ def main():
             if (prediction != 4 and last_prediction != 4):
                 print("ALERT YOU ARE NOT DRIVING SAFELY")
                 playsound(os.path.join(BASE_DIR, "Sounds","beep.mp3"))  
-            else:
-                print("Good job")
             last_prediction = prediction
         else:
             print("NO DRIVER")

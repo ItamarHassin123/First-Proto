@@ -46,7 +46,6 @@ def ClassifyDistract(img, model):
         tf_img = VAL_TF(img).unsqueeze(0).to(DEVICE)  # opening the image and transforming it
         logits = model(tf_img) # the results        
         pred = int(logits.argmax(dim=1).item() ) # the chosen class   
-        print(pred)
         return pred
 
 def person_present(img,model,score_thr=0.6):
@@ -105,7 +104,7 @@ def main():
 
     # Adding a capture webcam:
     capture = cv2.VideoCapture(0)
-    capture = cv2.VideoCapture(r"D:\Wiezmann\First-Proto\Vids to test\vid 1- Mixed.mp4")
+    capture = cv2.VideoCapture(r"D:\Wiezmann\First-Proto\Vids to test\vid 2- Mixed Frames.mp4")
     # MAIN LOOP
     last_prediction = 4 #initialize to driving safely
     while True:
@@ -120,8 +119,6 @@ def main():
             if (prediction != 4 and last_prediction != 4):
                 print("ALERT YOU ARE NOT DRIVING SAFELY")
                 playsound(os.path.join(BASE_DIR, "Sounds","beep.mp3"))  
-            else:
-                print("Good job")
             last_prediction = prediction
         else:
             print("NO DRIVER")
