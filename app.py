@@ -7,6 +7,7 @@ import torch.nn as nn
 from PIL import Image
 import streamlit as st
 from pathlib import Path
+from playsound3 import playsound
 from torchvision.models import resnet18
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as F
@@ -129,100 +130,130 @@ def classify(img_rgb, model, transforms):
         return int(out.argmax(dim=1).item())
 
 
-
-# =========================================================
-# Streamlit UI
-# =========================================================
-
-st.set_page_config(layout="wide")
-st.title("Driver Monitoring System")
-
-with st.sidebar:
-    st.header("Controls")
-
-    video_files = sorted(
-        [p for p in VIDS_DIR.iterdir() if p.suffix.lower() in {".mp4",".avi",".mov"}]
-    )[:3]
-
-    input_source = st.selectbox(
-        "Input Source",
-        ["Webcam"] + [v.name for v in video_files]
-    )
-
-    model_choice = st.radio(
-        "Model",
-        ["Custom CNN", "Transfer (ResNet18)"],
-        horizontal=True
-    )
-
-    start = st.button("Start", type="primary")
-    stop = st.button("Stop")
-
-if "running" not in st.session_state:
-    st.session_state.running = False
-
-if start:
-    st.session_state.running = True
-if stop:
-    st.session_state.running = False
-
-video_box = st.empty()
-status_box = st.empty()
-
-person_model, custom_model, transfer_model = load_models()
-
-cls_model = custom_model if model_choice == "Custom CNN" else transfer_model
-tf = VAL_TF_CUSTOM if model_choice == "Custom CNN" else VAL_TF_TRANSFER
-
-# Open video source
-if input_source == "Webcam":
-    cap = cv2.VideoCapture(0)
-else:
-    cap = cv2.VideoCapture(str(VIDS_DIR / input_source))
-
-last_prediction = 4
-t0 = time.time()
-frames = 0
-
-while st.session_state.running:
-    ret, frame_bgr = cap.read()
-    if not ret:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-        continue
-
-    frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-
-    if person_present(frame_rgb, person_model):
-        pred = classify(frame_rgb, cls_model, tf)
-        label = f"Class {pred}"
-        last_prediction = pred
+def getlabel(pred):
+    if (pred == 0):
+        return "Drinking"
+    elif (pred == 1):
+        return "doing hair and makeup"
+    elif (pred == 2):
+        return "using radio"
+    elif (pred == 3):
+        return "Reaching behind"
+    elif (pred == 4):
+        return "Driving safely"
+    elif (pred == 5 or pred == 6):
+        return "Using phone"
+    elif (pred == 7):
+        return "Talking to passenger"
     else:
-        label = "NO DRIVER"
-        last_prediction = 4
-
-    cv2.putText(frame_bgr, label, (20,40),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
-    
-    
-    video_box.image(
-        cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB),
-        width='stretch'
-    )
-
-    frames += 1
-    fps = frames / max(time.time() - t0, 1e-6)
-
-    status_box.markdown(
-        f"""
-        **Status**
-        - Input: `{input_source}`
-        - Model: `{model_choice}`
-        - Prediction: `{label}`
-        - FPS: `{fps:.1f}`
-        - Device: `{DEVICE}`
-        """
-    )
-    time.sleep(1.5)
+        return "Texting"
 
 
-cap.release()
+
+
+
+def main():
+    st.set_page_config(layout="wide")
+    st.title("Driver Monitoring System")
+
+    #Adding the sidebar to choose settings
+    with st.sidebar:
+        st.header("Controls")
+
+        video_files =[p for p in VIDS_DIR.iterdir()]
+
+        input_source = st.selectbox(
+            "Input Source",
+            ["Webcam"] + [v.name for v in video_files]
+        )
+
+        model_choice = st.radio(
+            "Model",
+            ["Custom CNN", "Transfer (ResNet18)"],
+            horizontal=True
+        )
+
+        start = st.button("Start", type="primary")
+        stop = st.button("Stop")
+
+
+
+    #adding running and configuring start and stop buttons
+    if "running" not in st.session_state:
+        st.session_state.running = False
+
+    if start:
+        st.session_state.running = True
+    if stop:
+        st.session_state.running = False
+
+
+
+    #adding empty box for video and status
+    video_box = st.empty()
+
+
+
+    #loading the models
+    person_model, custom_model, transfer_model = load_models()
+    if model_choice == "Custom CNN":
+        model = custom_model
+    else:
+        model = transfer_model
+
+
+    if model_choice == "Custom CNN":
+        tf = VAL_TF_CUSTOM
+    else:
+        tf = VAL_TF_TRANSFER
+
+
+
+
+    # Opening the video source
+    if input_source == "Webcam":
+        capture = cv2.VideoCapture(0)
+    else:
+        capture = cv2.VideoCapture(str(VIDS_DIR / input_source))
+
+
+
+    #Main loop
+    last_prediction = 4
+    while st.session_state.running:
+        #getting the frame
+        ret, frame_bgr = capture.read()
+        if not ret:
+            capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            continue
+        frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+
+
+        #getting the prediction
+        if person_present(frame_rgb, person_model):
+
+            prediction = classify(frame_rgb, model, tf)
+
+            if (prediction != 4 and last_prediction != 4):
+                playsound(os.path.join(BASE_DIR, "Sounds","beep.mp3"))
+            
+            label = f"{getlabel(prediction)}"
+            last_prediction = prediction
+        else:
+            label = "NO DRIVER"
+            last_prediction = 4
+
+
+        #displaying
+        cv2.putText(frame_bgr, label, (20,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+        video_box.image(
+            cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB),
+            width='stretch'
+        )
+        time.sleep(1)
+
+
+    capture.release()
+
+if __name__ == "__main__":
+    main()
