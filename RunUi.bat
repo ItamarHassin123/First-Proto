@@ -1,28 +1,30 @@
 @echo off
+setlocal
 cd /d "%~dp0"
 
-REM Create venv if missing
-if not exist ".venv" (
-    py -m venv .venv
+REM ---- Pick python via py launcher (avoids Windows Store alias) ----
+set "PYLAUNCH=py -3.11"
+%PYLAUNCH% -c "import sys" >nul 2>&1
+if errorlevel 1 (
+    set "PYLAUNCH=py"
 )
 
-REM Activate venv
-call ".venv\Scripts\activate"
+REM ---- Create venv if missing ----
+if not exist ".venv\Scripts\python.exe" (
+    %PYLAUNCH% -m venv .venv
+)
 
-REM Install deps (first time)
-pip install -q streamlit opencv-python torch torchvision pillow playsound3
+REM ---- Always use venv python directly ----
+set "PYEXE=%cd%\.venv\Scripts\python.exe"
 
-REM Use the venv python explicitly (IMPORTANT)
-set PYEXE=%cd%\.venv\Scripts\python.exe
+REM ---- Install deps (quiet). If machine has no internet, this will fail. ----
+"%PYEXE%" -m pip install -q --upgrade pip
+"%PYEXE%" -m pip install -q streamlit opencv-python torch torchvision pillow playsound3
 
-REM Start Streamlit hidden, write logs to streamlit.log
-powershell -NoProfile -WindowStyle Hidden -Command ^
-"Start-Process -WindowStyle Hidden -FilePath '%PYEXE%' -ArgumentList '-m','streamlit','run','app.py','--server.headless=true','--server.port=8501' -RedirectStandardOutput"
-
-REM Wait a moment
-timeout /t 2 /nobreak >nul
-
-REM Open browser
+REM ---- Open browser ----
 start "" "http://localhost:8501"
 
-exit
+REM ---- Run app (keep window open so server stays alive) ----
+"%PYEXE%" -m streamlit run app.py --server.address localhost --server.port 8501
+
+endlocal
