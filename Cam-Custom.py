@@ -103,7 +103,7 @@ def main():
     Distract_model_custom.eval()
 
     # Adding a capture webcam:
-    capture = cv2.VideoCapture(0)
+    capture = cv2.VideoCapture(1)
     capture = cv2.VideoCapture(r"D:\Wiezmann\First-Proto\Vids to test\vid 2- Mixed Frames.mp4")
     # MAIN LOOP
     last_prediction = 4 #initialize to driving safely
