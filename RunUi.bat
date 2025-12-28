@@ -18,8 +18,8 @@ REM ---- Always use venv python directly ----
 set "PYEXE=%cd%\.venv\Scripts\python.exe"
 
 REM ---- Install deps (quiet). If machine has no internet, this will fail. ----
-"%PYEXE%" -m pip install -q --upgrade pip
-"%PYEXE%" -m pip install -q streamlit opencv-python torch torchvision pillow playsound3
+"%PYEXE%" -m pip install --upgrade pip
+"%PYEXE%" -m pip install streamlit opencv-python torch torchvision pillow playsound3
 
 REM ---- Open browser ----
 start "" "http://localhost:8501"
