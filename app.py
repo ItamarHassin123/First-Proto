@@ -18,7 +18,7 @@ class ResizePad:
         self.size = size
 
     def __call__(self, img):
-        _, w, h = img.size
+        _, w, h = img.shape
         scale = self.size / max(w, h)
         new_w, new_h = int(w * scale), int(h * scale)
         img = F.resize(img, (new_h, new_w))

@@ -14,7 +14,7 @@ class ResizePad:
         self.size = size
 
     def __call__(self, img):
-        _, w, h = img.size
+        _, w, h = img.shape
         scale = self.size / max(w, h)          
         new_w, new_h = int(w * scale), int(h * scale)
         img = F.resize(img, (new_h, new_w))
@@ -32,8 +32,8 @@ class ResizePad:
 
 # Transforms
 VAL_TF = transforms.Compose([
-    ResizePad(224), # resizes
     transforms.ToTensor(), # turns the image into a tensor
+    ResizePad(224), # resizes
     transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225]), # normalizes the image based on imageNet stats
 ])
 
@@ -68,7 +68,7 @@ def main():
     Distract_Model_Transfer = resnet18() 
     feats = Distract_Model_Transfer.fc.in_features #number of final features
     Distract_Model_Transfer.fc = nn.Linear(feats, 10) # adding last layer
-    Distract_Model_Transfer.load_state_dict(torch.load(os.path.join(BASE_DIR,"DistractModelTransfer2.pth")))
+    Distract_Model_Transfer.load_state_dict(torch.load(os.path.join(BASE_DIR,"DistractModelTransfer2.pth"), map_location=torch.device(DEVICE)))
     Distract_Model_Transfer.to(DEVICE).eval()
 
 

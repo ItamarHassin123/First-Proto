@@ -13,7 +13,7 @@ class ResizePad:
         self.size = size
 
     def __call__(self, img):
-        _, w, h = img.size
+        _, w, h = img.shape
         scale = self.size / max(w, h)          
         new_w, new_h = int(w * scale), int(h * scale)
         img = F.resize(img, (new_h, new_w))
@@ -30,8 +30,8 @@ class ResizePad:
 
 # Transforms
 VAL_TF = transforms.Compose([
-    ResizePad(256), # resizes
     transforms.ToTensor(), # turns the image into a tensor
+    ResizePad(256), # resizes
     transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225]), # normalizes the image based on imageNet stats
 ])
 
