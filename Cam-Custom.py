@@ -1,7 +1,6 @@
 import os
 import cv2
 import torch.nn as nn
-from PIL import Image
 import torch, torchvision
 from playsound3 import playsound
 import torchvision.transforms as transforms
@@ -14,7 +13,7 @@ class ResizePad:
         self.size = size
 
     def __call__(self, img):
-        w, h = img.size
+        _, w, h = img.size
         scale = self.size / max(w, h)          
         new_w, new_h = int(w * scale), int(h * scale)
         img = F.resize(img, (new_h, new_w))
@@ -42,7 +41,6 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 # Decector functions
 def ClassifyDistract(img, model):
     with torch.no_grad():
-        img = Image.fromarray(img)
         tf_img = VAL_TF(img).unsqueeze(0).to(DEVICE)  # opening the image and transforming it
         logits = model(tf_img) # the results        
         pred = int(logits.argmax(dim=1).item() ) # the chosen class   
